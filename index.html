@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-Bahn Simulator</title>
+    <style>
+        :root {
+            --sbahn-rot: #d30114;
+            --sbahn-gruen: #008754;
+            --bier-gelb: #f39c12;
+            --hintergrund: #eef2f5;
+            --dunkel: #2f3542;
+            --grau: #a4b0be;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--hintergrund);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .s-bahn-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #2f3542; /* Dunkelgrau statt dem offiziellen Grün */
+            color: white;
+            font-weight: 900;
+            font-size: 28px;
+            width: 55px;
+            height: 55px;
+            border-radius: 12px; /* Eckig statt rund, um das geschützte Logo zu vermeiden */
+            margin-right: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            font-family: Arial, sans-serif;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            color: var(--dunkel);
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #747d8c;
+            font-size: 16px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .game-container {
+            background: white;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-top: 8px solid var(--sbahn-rot);
+        }
+
+        .img-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        img {
+            width: 100%;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-main {
+            background-color: var(--sbahn-rot);
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(211, 1, 20, 0.3);
+            transition: all 0.2s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .btn-main:hover {
+            background-color: #b0000f;
+            transform: translateY(-2px);
+        }
+
+        .btn-dynamic {
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-dynamic.pfeife {
+            background-color: var(--sbahn-gruen);
+            box-shadow: 0 5px 15px rgba(0, 135, 84, 0.3);
+        }
+
+        .btn-dynamic.pfeife:hover {
+            background-color: #006e43;
+            transform: translateY(-2px);
+        }
+
+        .btn-dynamic.bier {
+            background-color: var(--bier-gelb);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-dynamic.bier:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+        }
+
+        .btn-main:active, .btn-dynamic:active {
+            transform: translateY(1px);
+        }
+
+        #status-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #ced4da;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dunkel);
+            transition: all 0.3s ease;
+        }
+
+        .dienst-aktiv {
+            border-left-color: var(--sbahn-gruen) !important;
+            background-color: #e8f5e9 !important;
+            color: var(--sbahn-gruen) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="s-bahn-logo">S</div>
+        <h1>S-Bahn</h1>
+    </div>
+    <div class="subtitle">Inoffizieller Lokführer-Dienstplaner</div>
+    
+    <div class="game-container">
+        <div class="img-wrapper">
+            <img id="bahn-bild" src="ohne-hut.jpg" alt="Simon im Feierabend">
+        </div>
+        
+        <button id="action-btn" class="btn-main" onclick="schichtWechsel()">Dienstantritt Simon</button>
+        
+        <button id="dynamic-btn" class="btn-dynamic bier" onclick="actionTrigger()">Feierabend-Bier gönnen 🍺</button>
+        
+        <div id="status-box">Status: Simon hat Feierabend 😴</div>
+    </div>
+
+    <audio id="jabadadbau-sound" src="sound.mp3"></audio>
+    <audio id="pfeifen-sound" src="pfeife.mp3"></audio>
+    <audio id="bier-sound" src="bier.mp3"></audio>
+
+    <script>
+        let hatHut = false;
+        let isActionActive = false;
+
+        const bild = document.getElementById('bahn-bild');
+        const button = document.getElementById('action-btn');
+        const dynamicBtn = document.getElementById('dynamic-btn');
+        const statusBox = document.getElementById('status-box');
+        
+        const soundDienst = document.getElementById('jabadadbau-sound');
+        const soundPfeife = document.getElementById('pfeifen-sound');
+        const soundBier = document.getElementById('bier-sound');
+
+        function schichtWechsel() {
+            if (isActionActive) return;
+
+            if (!hatHut) {
+                bild.src = "mit-hut.jpg";
+                button.innerText = "Feierabend für Simon";
+                statusBox.innerText = "Nächster Halt: Hauptbahnhof! 🧑‍✈️ Er ist im Dienst.";
+                statusBox.classList.add('dienst-aktiv');
+                
+                dynamicBtn.className = "btn-dynamic pfeife";
+                dynamicBtn.innerText = "Abfahrtsignal geben 🔊";
+                
+                soundDienst.currentTime = 0; 
+                soundDienst.play();
+                
+                hatHut = true;
+            } else {
+                bild.src = "ohne-hut.jpg";
+                button.innerText = "Dienstantritt Simon";
+                statusBox.innerText = "Status: Simon hat Feierabend 😴";
+                statusBox.classList.remove('dienst-aktiv');
+                
+                dynamicBtn.className = "btn-dynamic bier";
+                dynamicBtn.innerText = "Feierabend-Bier gönnen 🍺";
+                
+                hatHut = false;
+            }
+        }
+
+        function actionTrigger() {
+            if (isActionActive) return;
+            isActionActive = true;
+
+            if (hatHut) {
+                bild.src = "mit-pfeife.jpg";
+                statusBox.innerText = "Zp 9! Bitte zurückbleiben! 📢";
+
+                soundPfeife.currentTime = 0;
+                soundPfeife.play();
+
+                setTimeout(() => {
+                    if (hatHut) {
+                        bild.src = "mit-hut.jpg";
+                        statusBox.innerText = "Nächster Halt: Hauptbahnhof! 🧑‍✈️ Er ist im Dienst.";
+                    }
+                    isActionActive = false;
+                }, 1500);
+            } else {
+                bild.src = "mit-bier.jpg";
+                statusBox.innerText = "Prost! Wohlverdienter Feierabend! 🍻";
+
+                soundBier.currentTime = 0;
+                soundBier.play();
+
+                setTimeout(() => {
+                    if (!hatHut) {
+                        bild.src = "ohne-hut.jpg";
+                        statusBox.innerText = "Status: Simon hat Feierabend 😴";
+                    }
+                    isActionActive = false;
+                }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
