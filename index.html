@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S-Bahn Simulator</title>
+    <title>S-Bahn Hamburg Simulator</title>
     <style>
         :root {
             --sbahn-rot: #d30114;
             --sbahn-gruen: #008754;
             --bier-gelb: #f39c12;
-            --hintergrund: #eef2f5;
+            --kaffee-braun: #6f4e37;
+            --streik-orange: #e67e22;
+            --sifa-alarm: #ff4d4d;
+            --hintergrund: #11141a; 
             --dunkel: #2f3542;
-            --grau: #a4b0be;
+            --hamburg-blau: #102a45;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--hintergrund);
+            color: #ffffff;
             text-align: center;
             padding: 20px;
             margin: 0;
@@ -26,15 +30,15 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background-color: #2f3542; /* Dunkelgrau statt dem offiziellen Grün */
+            background-color: var(--sbahn-gruen); 
             color: white;
             font-weight: 900;
-            font-size: 28px;
+            font-size: 32px;
             width: 55px;
             height: 55px;
-            border-radius: 12px; /* Eckig statt rund, um das geschützte Logo zu vermeiden */
+            border-radius: 50%; 
             margin-right: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0, 135, 84, 0.4);
             font-family: Arial, sans-serif;
         }
 
@@ -47,7 +51,7 @@
         }
 
         h1 {
-            color: var(--dunkel);
+            color: white;
             margin: 0;
             font-size: 28px;
             text-transform: uppercase;
@@ -55,20 +59,22 @@
         }
 
         .subtitle {
-            color: #747d8c;
+            color: #a4b0be;
             font-size: 16px;
             margin-bottom: 25px;
             font-weight: 500;
         }
 
         .game-container {
-            background: white;
+            position: relative;
+            background: #1c2430; 
             max-width: 480px;
             margin: 0 auto;
             padding: 25px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            border-top: 8px solid var(--sbahn-rot);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border-top: 8px solid var(--sbahn-rot); 
+            transition: background-color 0.3s ease;
         }
 
         .img-wrapper {
@@ -76,13 +82,20 @@
             margin-bottom: 25px;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 3px solid #2f3542;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         img {
             width: 100%;
             display: block;
             transition: transform 0.3s ease;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
 
         .btn-main {
@@ -96,10 +109,8 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(211, 1, 20, 0.3);
             transition: all 0.2s ease;
-            width: 100%;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 15px;
         }
 
         .btn-main:hover {
@@ -116,7 +127,6 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 100%;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -125,61 +135,128 @@
             background-color: var(--sbahn-gruen);
             box-shadow: 0 5px 15px rgba(0, 135, 84, 0.3);
         }
-
-        .btn-dynamic.pfeife:hover {
-            background-color: #006e43;
-            transform: translateY(-2px);
-        }
+        .btn-dynamic.pfeife:hover { background-color: #006e43; transform: translateY(-2px); }
 
         .btn-dynamic.bier {
             background-color: var(--bier-gelb);
             box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
         }
+        .btn-dynamic.bier:hover { background-color: #d35400; transform: translateY(-2px); }
 
-        .btn-dynamic.bier:hover {
-            background-color: #d35400;
-            transform: translateY(-2px);
+        .btn-dynamic.kaffee {
+            background-color: var(--kaffee-braun);
+            box-shadow: 0 5px 15px rgba(111, 78, 55, 0.3);
+        }
+        .btn-dynamic.kaffee:hover { background-color: #523928; transform: translateY(-2px); }
+
+        .btn-dynamic.streik {
+            background-color: var(--streik-orange);
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+        }
+        .btn-dynamic.streik:hover { background-color: #d35400; transform: translateY(-2px); }
+
+        .btn-dynamic.streik-ende {
+            background-color: #2980b9;
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
+        }
+        .btn-dynamic.streik-ende:hover { background-color: #1f6693; transform: translateY(-2px); }
+
+        .btn-sifa {
+            background-color: var(--sifa-alarm);
+            animation: pulse 0.5s infinite alternate;
+            box-shadow: 0 0 20px var(--sifa-alarm);
+            font-size: 20px;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+
+        /* Game Over Screen */
+        #game-over-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 20px;
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            color: white;
         }
 
-        .btn-main:active, .btn-dynamic:active {
-            transform: translateY(1px);
+        #game-over-screen h2 {
+            color: var(--sifa-alarm);
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn-restart {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
         }
 
         #status-box {
             margin-top: 20px;
             padding: 15px;
             border-radius: 10px;
-            background-color: #f8f9fa;
-            border-left: 5px solid #ced4da;
+            background-color: #050b14;
+            border: 2px solid #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 18px;
-            font-weight: 600;
-            color: var(--dunkel);
+            font-weight: bold;
+            color: #00ffcc; 
+            text-shadow: 0 0 5px #00ffcc;
             transition: all 0.3s ease;
         }
 
-        .dienst-aktiv {
-            border-left-color: var(--sbahn-gruen) !important;
-            background-color: #e8f5e9 !important;
-            color: var(--sbahn-gruen) !important;
-        }
+        .dienst-aktiv { border-color: #00ff00 !important; color: #00ff00 !important; text-shadow: 0 0 5px #00ff00 !important; }
+        .streik-aktiv { border-color: var(--streik-orange) !important; color: var(--streik-orange) !important; text-shadow: 0 0 5px var(--streik-orange) !important; }
+        .sifa-aktiv { border-color: var(--sifa-alarm) !important; color: var(--sifa-alarm) !important; text-shadow: 0 0 5px var(--sifa-alarm) !important; }
     </style>
 </head>
 <body>
 
     <div class="header-container">
         <div class="s-bahn-logo">S</div>
-        <h1>S-Bahn</h1>
+        <h1>S-Bahn Hamburg</h1>
     </div>
-    <div class="subtitle">Inoffizieller Lokführer-Dienstplaner</div>
+    <div class="subtitle">Inoffizieller Lokführer-Dienstplaner (Linie S1/S3)</div>
     
-    <div class="game-container">
+    <div class="game-container" id="main-container">
+        
+        <!-- Game Over Overlay -->
+        <div id="game-over-screen">
+            <h2>💥 ZWANGSBREMSUNG 💥</h2>
+            <p style="font-size: 18px;">Sifa-Pedal nicht rechtzeitig gedrückt!</p>
+            <p>Sicherheit geht vor beim HVV.</p>
+            <button class="btn-restart" onclick="spielReset()">Zug zurücksetzen 🔄</button>
+        </div>
+
         <div class="img-wrapper">
             <img id="bahn-bild" src="ohne-hut.jpg" alt="Simon im Feierabend">
         </div>
         
-        <button id="action-btn" class="btn-main" onclick="schichtWechsel()">Dienstantritt Simon</button>
-        
-        <button id="dynamic-btn" class="btn-dynamic bier" onclick="actionTrigger()">Feierabend-Bier gönnen 🍺</button>
+        <div class="btn-grid">
+            <button id="action-btn" class="btn-main" onclick="schichtWechsel()">Dienstantritt Simon</button>
+            <button id="dynamic-btn" class="btn-dynamic bier" onclick="actionTrigger()">Feierabend-Bier gönnen 🍺</button>
+            <button id="kaffee-btn" class="btn-dynamic kaffee" onclick="trinkeKaffee()" style="display: none;">Kaffee-Notfall ordern ☕</button>
+            <button id="streik-btn" class="btn-dynamic streik" onclick="streikAusloesen()" style="display: none;">Kein Bock mehr auf Arbeit! 🪧</button>
+            <button id="streik-ende-btn" class="btn-dynamic streik-ende" onclick="streikBeenden()" style="display: none;">Streik beenden 🛠️</button>
+            <button id="sifa-btn" class="btn-dynamic btn-sifa" onclick="sifaDruecken()" style="display: none;">🚨 SIFA PEDAL DRÜCKEN! (<span id="sifa-timer">3</span>s) 🚨</button>
+        </div>
         
         <div id="status-box">Status: Simon hat Feierabend 😴</div>
     </div>
@@ -187,51 +264,96 @@
     <audio id="jabadadbau-sound" src="sound.mp3"></audio>
     <audio id="pfeifen-sound" src="pfeife.mp3"></audio>
     <audio id="bier-sound" src="bier.mp3"></audio>
+    <audio id="kaffee-sound" src="kaffee.mp3"></audio> 
+    <audio id="streik-sound" src="streik.mp3"></audio> 
+    <audio id="sifa-sound" src="sifa.mp3"></audio>
+    <audio id="zwangsbremsung-sound" src="zwangsbremsung.mp3"></audio>
 
     <script>
         let hatHut = false;
         let isActionActive = false;
+        let ersterSifaErfolgreich = false;
+
+        // Sifa Variablen
+        let sifaAktiv = false;
+        let sifaZeit = 3;
+        let sifaIntervall;
+        let sifaLoopTimer;
+        let sifaErsterGarantieTimer;
 
         const bild = document.getElementById('bahn-bild');
         const button = document.getElementById('action-btn');
         const dynamicBtn = document.getElementById('dynamic-btn');
+        const kaffeeBtn = document.getElementById('kaffee-btn');
+        const streikBtn = document.getElementById('streik-btn');
+        const streikEndeBtn = document.getElementById('streik-ende-btn');
+        const sifaBtn = document.getElementById('sifa-btn');
         const statusBox = document.getElementById('status-box');
+        const mainContainer = document.getElementById('main-container');
+        const gameOverScreen = document.getElementById('game-over-screen');
         
         const soundDienst = document.getElementById('jabadadbau-sound');
         const soundPfeife = document.getElementById('pfeifen-sound');
         const soundBier = document.getElementById('bier-sound');
+        const soundKaffee = document.getElementById('kaffee-sound');
+        const soundStreik = document.getElementById('streik-sound');
+        const soundSifa = document.getElementById('sifa-sound');
+        const soundZwangsbremsung = document.getElementById('zwangsbremsung-sound');
+
+        function starteSifaErstenGarantieTimer() {
+            // Verhindert Überschneidungen und stellt den 5-Sekunden-Timer sauber ein
+            clearTimeout(sifaErsterGarantieTimer);
+            clearTimeout(sifaLoopTimer);
+            ersterSifaErfolgreich = false;
+
+            sifaErsterGarantieTimer = setTimeout(() => {
+                if (hatHut && !sifaAktiv && !isActionActive) {
+                    startSifaGame();
+                }
+            }, 5000); // Exakt 5 Sekunden bis zur ersten Sifa
+        }
+
+        function planeNaechsteSifa() {
+            if (!hatHut || sifaAktiv) return;
+            
+            // Zufällige Sifa-Verzögerung zwischen 30s und 60s
+            let zufallsVerzoegerung = Math.floor(Math.random() * 30000) + 30000;
+            
+            sifaLoopTimer = setTimeout(() => {
+                if (hatHut && !sifaAktiv && !isActionActive) {
+                    startSifaGame();
+                }
+                planeNaechsteSifa(); 
+            }, zufallsVerzoegerung);
+        }
 
         function schichtWechsel() {
-            if (isActionActive) return;
+            if (isActionActive || sifaAktiv) return;
 
             if (!hatHut) {
                 bild.src = "mit-hut.jpg";
-                button.innerText = "Feierabend für Simon";
+                button.innerText = "Schicht abbrechen";
                 statusBox.innerText = "Nächster Halt: Hauptbahnhof! 🧑‍✈️ Er ist im Dienst.";
-                statusBox.classList.add('dienst-aktiv');
+                statusBox.className = "dienst-aktiv";
                 
                 dynamicBtn.className = "btn-dynamic pfeife";
                 dynamicBtn.innerText = "Abfahrtsignal geben 🔊";
                 
+                kaffeeBtn.style.display = "block"; 
+                streikBtn.style.display = "block"; 
+
                 soundDienst.currentTime = 0; 
-                soundDienst.play();
+                soundDienst.play().catch(() => {});
                 
                 hatHut = true;
+                starteSifaErstenGarantieTimer(); // Startet nur den 5-Sekunden-Timer
             } else {
-                bild.src = "ohne-hut.jpg";
-                button.innerText = "Dienstantritt Simon";
-                statusBox.innerText = "Status: Simon hat Feierabend 😴";
-                statusBox.classList.remove('dienst-aktiv');
-                
-                dynamicBtn.className = "btn-dynamic bier";
-                dynamicBtn.innerText = "Feierabend-Bier gönnen 🍺";
-                
-                hatHut = false;
+                spielReset();
             }
         }
 
         function actionTrigger() {
-            if (isActionActive) return;
+            if (isActionActive || sifaAktiv) return;
             isActionActive = true;
 
             if (hatHut) {
@@ -239,10 +361,10 @@
                 statusBox.innerText = "Zp 9! Bitte zurückbleiben! 📢";
 
                 soundPfeife.currentTime = 0;
-                soundPfeife.play();
+                soundPfeife.play().catch(() => {});
 
                 setTimeout(() => {
-                    if (hatHut) {
+                    if (hatHut && !sifaAktiv) {
                         bild.src = "mit-hut.jpg";
                         statusBox.innerText = "Nächster Halt: Hauptbahnhof! 🧑‍✈️ Er ist im Dienst.";
                     }
@@ -253,7 +375,7 @@
                 statusBox.innerText = "Prost! Wohlverdienter Feierabend! 🍻";
 
                 soundBier.currentTime = 0;
-                soundBier.play();
+                soundBier.play().catch(() => {});
 
                 setTimeout(() => {
                     if (!hatHut) {
@@ -263,6 +385,153 @@
                     isActionActive = false;
                 }, 1500);
             }
+        }
+
+        function trinkeKaffee() {
+            if (isActionActive || !hatHut || sifaAktiv) return;
+            isActionActive = true;
+
+            bild.src = "mit-kaffee.jpg";
+            statusBox.innerText = "Schlürf... Koffeinschub aktiviert! Simon ist topfit! ⚡";
+            
+            if (soundKaffee) {
+                soundKaffee.currentTime = 0;
+                soundKaffee.play().catch(() => {});
+            }
+
+            setTimeout(() => {
+                if (hatHut && !sifaAktiv) {
+                    bild.src = "mit-hut.jpg";
+                    statusBox.innerText = "Nächster Halt: Hauptbahnhof! 🧑‍✈️ Er ist im Dienst.";
+                }
+                isActionActive = false;
+            }, 1500);
+        }
+
+        function streikAusloesen() {
+            if (isActionActive || !hatHut || sifaAktiv) return;
+            
+            clearTimeout(sifaLoopTimer);
+            clearTimeout(sifaErsterGarantieTimer);
+
+            bild.src = "mit-streik.jpg";
+            statusBox.innerText = "Kein Bock mehr auf Arbeit! Simon streikt! 🪧";
+            statusBox.className = "streik-aktiv";
+
+            if (soundStreik) {
+                soundStreik.currentTime = 0;
+                soundStreik.play().catch(() => {});
+            }
+
+            button.style.display = "none";
+            dynamicBtn.style.display = "none";
+            kaffeeBtn.style.display = "none";
+            streikBtn.style.display = "none";
+            
+            streikEndeBtn.style.display = "block";
+            hatHut = false;
+        }
+
+        function streikBeenden() {
+            streikEndeBtn.style.display = "none";
+            button.style.display = "block";
+            spielReset();
+        }
+
+        function startSifaGame() {
+            sifaAktiv = true;
+            sifaZeit = 3;
+            document.getElementById('sifa-timer').innerText = sifaZeit;
+            
+            dynamicBtn.style.display = "none";
+            kaffeeBtn.style.display = "none";
+            streikBtn.style.display = "none";
+            button.style.display = "none";
+            sifaBtn.style.display = "block";
+            
+            statusBox.innerText = "🚨 SIFA ALARM! REAKTION GEFORDERT! 🚨";
+            statusBox.className = "sifa-aktiv";
+            bild.src = "mit-sifa.jpg"; 
+            
+            soundSifa.currentTime = 0;
+            soundSifa.play().catch(() => {});
+
+            mainContainer.style.backgroundColor = "rgba(211, 1, 20, 0.3)";
+
+            sifaIntervall = setInterval(() => {
+                sifaZeit--;
+                document.getElementById('sifa-timer').innerText = sifaZeit;
+                
+                if (sifaZeit <= 0) {
+                    clearInterval(sifaIntervall);
+                    sifaFail();
+                }
+            }, 1000);
+        }
+
+        function sifaDruecken() {
+            if (!sifaAktiv) return;
+            clearInterval(sifaIntervall);
+            sifaAktiv = false;
+            
+            soundSifa.pause();
+            
+            statusBox.innerText = "Sifa bestätigt. Wachsamkeit bewiesen! 👍";
+            statusBox.className = "dienst-aktiv";
+            bild.src = "mit-hut.jpg";
+            
+            sifaBtn.style.display = "none";
+            button.style.display = "block";
+            dynamicBtn.style.display = "block";
+            kaffeeBtn.style.display = "block";
+            streikBtn.style.display = "block";
+            mainContainer.style.backgroundColor = "transparent";
+
+            // Aktiviert das spätere Intervall erst, wenn die erste Sifa gemeistert wurde
+            if (!ersterSifaErfolgreich) {
+                ersterSifaErfolgreich = true;
+                planeNaechsteSifa();
+            }
+        }
+
+        function sifaFail() {
+            sifaAktiv = false;
+            clearTimeout(sifaLoopTimer);
+            clearTimeout(sifaErsterGarantieTimer);
+            soundSifa.pause();
+            
+            gameOverScreen.style.display = "flex";
+            soundZwangsbremsung.currentTime = 0;
+            soundZwangsbremsung.play().catch(() => {});
+        }
+
+        function spielReset() {
+            clearInterval(sifaIntervall);
+            clearTimeout(sifaLoopTimer);
+            clearTimeout(sifaErsterGarantieTimer);
+            
+            hatHut = false;
+            isActionActive = false;
+            sifaAktiv = false;
+            ersterSifaErfolgreich = false;
+            
+            bild.src = "ohne-hut.jpg";
+            button.innerText = "Dienstantritt Simon";
+            button.style.display = "block";
+            statusBox.innerText = "Status: Simon hat Feierabend 😴";
+            statusBox.className = "";
+            
+            dynamicBtn.className = "btn-dynamic bier";
+            dynamicBtn.innerText = "Feierabend-Bier gönnen 🍺";
+            dynamicBtn.style.display = "block";
+            
+            kaffeeBtn.style.display = "none";
+            streikBtn.style.display = "none";
+            streikEndeBtn.style.display = "none";
+            sifaBtn.style.display = "none";
+            
+            mainContainer.style.backgroundColor = "transparent";
+            gameOverScreen.style.display = "none";
         }
     </script>
 </body>
